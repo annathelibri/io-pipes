@@ -8,17 +8,25 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public interface DataPipe extends Closeable {
-
+    //Content Control
     @NotNull
     DataPipe flush() throws IOException;
 
     @NotNull
-    InputStream getInputStream();
-
-    @NotNull
     OutputStream getOutputStream();
 
+    //Raw IO
+    @NotNull
+    InputStream getInputStream();
+
+    //Default Reads
     boolean readBoolean() throws IOException;
+
+    int skipBytes(int n) throws IOException;
+
+    //Default Writes
+    @NotNull
+    DataPipe writeBoolean(boolean v) throws IOException;
 
     byte readByte() throws IOException;
 
@@ -47,10 +55,8 @@ public interface DataPipe extends Closeable {
 
     int readUnsignedShort() throws IOException;
 
-    int skipBytes(int n) throws IOException;
-
     @NotNull
-    DataPipe writeBoolean(boolean v) throws IOException;
+    DataPipe writeChars(@NotNull CharSequence s) throws IOException;
 
     @NotNull
     DataPipe writeByte(int b) throws IOException;
@@ -67,8 +73,8 @@ public interface DataPipe extends Closeable {
     @NotNull
     DataPipe writeChar(int v) throws IOException;
 
-    @NotNull
-    DataPipe writeChars(@NotNull String s) throws IOException;
+    @Override
+    void close() throws IOException;
 
     @NotNull
     DataPipe writeDouble(double v) throws IOException;
@@ -88,9 +94,7 @@ public interface DataPipe extends Closeable {
     @NotNull
     DataPipe writeString(@NotNull String s) throws IOException;
 
-    @Override
-    void close() throws IOException;
-
+    //Byte shortcuts
     default byte read() throws IOException {
         return readByte();
     }
@@ -99,4 +103,196 @@ public interface DataPipe extends Closeable {
     default DataPipe write(int v) throws IOException {
         return writeByte(v);
     }
+
+    //Read Arrays
+    @NotNull
+    default boolean[] readBooleanArray(int length) throws IOException {
+        boolean[] array = new boolean[length];
+        for (int i = 0; i < array.length; i++) array[i] = readBoolean();
+        return array;
+    }
+
+    @NotNull
+    default byte[] readByteArray(int length) throws IOException {
+        byte[] array = new byte[length];
+        for (int i = 0; i < array.length; i++) array[i] = readByte();
+        return array;
+    }
+
+    @NotNull
+    default char[] readCharArray(int length) throws IOException {
+        char[] array = new char[length];
+        for (int i = 0; i < array.length; i++) array[i] = readChar();
+        return array;
+    }
+
+    @NotNull
+    default double[] readDoubleArray(int length) throws IOException {
+        double[] array = new double[length];
+        for (int i = 0; i < array.length; i++) array[i] = readDouble();
+        return array;
+    }
+
+    @NotNull
+    default float[] readFloatArray(int length) throws IOException {
+        float[] array = new float[length];
+        for (int i = 0; i < array.length; i++) array[i] = readFloat();
+        return array;
+    }
+
+    @NotNull
+    default int[] readIntArray(int length) throws IOException {
+        int[] array = new int[length];
+        for (int i = 0; i < array.length; i++) array[i] = readInt();
+        return array;
+    }
+
+    @NotNull
+    default long[] readLongArray(int length) throws IOException {
+        long[] array = new long[length];
+        for (int i = 0; i < array.length; i++) array[i] = readLong();
+        return array;
+    }
+
+    @NotNull
+    default short[] readShortArray(int length) throws IOException {
+        short[] array = new short[length];
+        for (int i = 0; i < array.length; i++) array[i] = readShort();
+        return array;
+    }
+
+    //Read Sized Arrays
+    default boolean[] readSizedBooleanArray() throws IOException {
+        return readBooleanArray(readInt());
+    }
+
+    default byte[] readSizedByteArray() throws IOException {
+        return readByteArray(readInt());
+    }
+
+    default char[] readSizedCharArray() throws IOException {
+        return readCharArray(readInt());
+    }
+
+    default double[] readSizedDoubleArray() throws IOException {
+        return readDoubleArray(readInt());
+    }
+
+    default float[] readSizedFloatArray() throws IOException {
+        return readFloatArray(readInt());
+    }
+
+    default int[] readSizedIntArray() throws IOException {
+        return readIntArray(readInt());
+    }
+
+    default long[] readSizedLongArray() throws IOException {
+        return readLongArray(readInt());
+    }
+
+    default short[] readSizedShortArray() throws IOException {
+        return readShortArray(readInt());
+    }
+
+    //Write Arrays
+    @NotNull
+    default DataPipe writeBooleanArray(@NotNull boolean[] array) throws IOException {
+        for (boolean v : array) writeBoolean(v);
+        return this;
+    }
+
+    @NotNull
+    default DataPipe writeByteArray(@NotNull byte[] array) throws IOException {
+        for (byte v : array) writeByte(v);
+        return this;
+    }
+
+    @NotNull
+    default DataPipe writeCharArray(@NotNull char[] array) throws IOException {
+        for (char v : array) writeChar(v);
+        return this;
+    }
+
+    @NotNull
+    default DataPipe writeDoubleArray(@NotNull double[] array) throws IOException {
+        for (double v : array) writeDouble(v);
+        return this;
+    }
+
+    @NotNull
+    default DataPipe writeFloatArray(@NotNull float[] array) throws IOException {
+        for (float v : array) writeFloat(v);
+        return this;
+    }
+
+    @NotNull
+    default DataPipe writeIntArray(@NotNull int[] array) throws IOException {
+        for (int v : array) writeInt(v);
+        return this;
+    }
+
+    @NotNull
+    default DataPipe writeLongArray(@NotNull long[] array) throws IOException {
+        for (long v : array) writeLong(v);
+        return this;
+    }
+
+    @NotNull
+    default DataPipe writeShortArray(@NotNull short[] array) throws IOException {
+        for (short v : array) writeShort(v);
+        return this;
+    }
+
+    //Write Sized Arrays
+    @NotNull
+    default DataPipe writeSizedBooleanArray(@NotNull boolean[] array) throws IOException {
+        return writeInt(array.length).writeBooleanArray(array);
+    }
+
+    @NotNull
+    default DataPipe writeSizedByteArray(@NotNull byte[] array) throws IOException {
+        return writeInt(array.length).writeByteArray(array);
+    }
+
+    @NotNull
+    default DataPipe writeSizedCharArray(@NotNull char[] array) throws IOException {
+        return writeInt(array.length).writeCharArray(array);
+    }
+
+    @NotNull
+    default DataPipe writeSizedDoubleArray(@NotNull double[] array) throws IOException {
+        return writeInt(array.length).writeDoubleArray(array);
+    }
+
+    @NotNull
+    default DataPipe writeSizedFloatArray(@NotNull float[] array) throws IOException {
+        return writeInt(array.length).writeFloatArray(array);
+    }
+
+    @NotNull
+    default DataPipe writeSizedIntArray(@NotNull int[] array) throws IOException {
+        return writeInt(array.length).writeIntArray(array);
+    }
+
+    @NotNull
+    default DataPipe writeSizedLongArray(@NotNull long[] array) throws IOException {
+        return writeInt(array.length).writeLongArray(array);
+    }
+
+    @NotNull
+    default DataPipe writeSizedShortArray(@NotNull short[] array) throws IOException {
+        return writeInt(array.length).writeShortArray(array);
+    }
+
+    @NotNull
+    default DataPipe writeSizedStringArray(@NotNull String[] array) throws IOException {
+        return writeInt(array.length).writeStringArray(array);
+    }
+
+    @NotNull
+    default DataPipe writeStringArray(@NotNull String[] array) throws IOException {
+        for (String v : array) writeString(v);
+        return this;
+    }
+
 }

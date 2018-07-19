@@ -205,7 +205,7 @@ public class DataPipeStream implements DataPipe {
 
     @NotNull
     @Override
-    public final DataPipeStream writeChars(String s) throws IOException {
+    public final DataPipeStream writeChars(CharSequence s) throws IOException {
         int len = s.length();
         for (int i = 0; i < len; i++) {
             int v = s.charAt(i);
