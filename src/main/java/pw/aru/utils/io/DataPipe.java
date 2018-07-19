@@ -8,25 +8,24 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public interface DataPipe extends Closeable {
-    //Content Control
-    @NotNull
-    DataPipe flush() throws IOException;
-
+    //Raw IO
     @NotNull
     OutputStream getOutputStream();
 
-    //Raw IO
     @NotNull
     InputStream getInputStream();
 
-    //Default Reads
-    boolean readBoolean() throws IOException;
+    //Content Control
+    @Override
+    void close() throws IOException;
+
+    @NotNull
+    DataPipe flush() throws IOException;
 
     int skipBytes(int n) throws IOException;
 
-    //Default Writes
-    @NotNull
-    DataPipe writeBoolean(boolean v) throws IOException;
+    //Default Reads
+    boolean readBoolean() throws IOException;
 
     byte readByte() throws IOException;
 
@@ -55,8 +54,9 @@ public interface DataPipe extends Closeable {
 
     int readUnsignedShort() throws IOException;
 
+    //Default Writes
     @NotNull
-    DataPipe writeChars(@NotNull CharSequence s) throws IOException;
+    DataPipe writeBoolean(boolean v) throws IOException;
 
     @NotNull
     DataPipe writeByte(int b) throws IOException;
@@ -73,8 +73,8 @@ public interface DataPipe extends Closeable {
     @NotNull
     DataPipe writeChar(int v) throws IOException;
 
-    @Override
-    void close() throws IOException;
+    @NotNull
+    DataPipe writeChars(@NotNull CharSequence s) throws IOException;
 
     @NotNull
     DataPipe writeDouble(double v) throws IOException;
@@ -161,37 +161,57 @@ public interface DataPipe extends Closeable {
         return array;
     }
 
+    @NotNull
+    default String[] readStringArray(int length) throws IOException {
+        String[] array = new String[length];
+        for (int i = 0; i < array.length; i++) array[i] = readString();
+        return array;
+    }
+
     //Read Sized Arrays
+    @NotNull
     default boolean[] readSizedBooleanArray() throws IOException {
         return readBooleanArray(readInt());
     }
 
+    @NotNull
     default byte[] readSizedByteArray() throws IOException {
         return readByteArray(readInt());
     }
 
+    @NotNull
     default char[] readSizedCharArray() throws IOException {
         return readCharArray(readInt());
     }
 
+    @NotNull
     default double[] readSizedDoubleArray() throws IOException {
         return readDoubleArray(readInt());
     }
 
+    @NotNull
     default float[] readSizedFloatArray() throws IOException {
         return readFloatArray(readInt());
     }
 
+    @NotNull
     default int[] readSizedIntArray() throws IOException {
         return readIntArray(readInt());
     }
 
+    @NotNull
     default long[] readSizedLongArray() throws IOException {
         return readLongArray(readInt());
     }
 
+    @NotNull
     default short[] readSizedShortArray() throws IOException {
         return readShortArray(readInt());
+    }
+
+    @NotNull
+    default String[] readSizedStringArray() throws IOException {
+        return readStringArray(readInt());
     }
 
     //Write Arrays
@@ -243,6 +263,12 @@ public interface DataPipe extends Closeable {
         return this;
     }
 
+    @NotNull
+    default DataPipe writeStringArray(@NotNull String[] array) throws IOException {
+        for (String v : array) writeString(v);
+        return this;
+    }
+
     //Write Sized Arrays
     @NotNull
     default DataPipe writeSizedBooleanArray(@NotNull boolean[] array) throws IOException {
@@ -288,11 +314,4 @@ public interface DataPipe extends Closeable {
     default DataPipe writeSizedStringArray(@NotNull String[] array) throws IOException {
         return writeInt(array.length).writeStringArray(array);
     }
-
-    @NotNull
-    default DataPipe writeStringArray(@NotNull String[] array) throws IOException {
-        for (String v : array) writeString(v);
-        return this;
-    }
-
 }
